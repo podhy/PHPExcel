@@ -1988,7 +1988,7 @@ class PHPExcel_Reader_Excel5 extends PHPExcel_Reader_Abstract implements PHPExce
             }
 
             // offset: 10; size: 1; underline type
-            $underlineType = ord($recordData{10});
+            $underlineType = ord($recordData[10]);
             switch ($underlineType) {
                 case 0x00:
                     break; // no underline
@@ -2888,7 +2888,7 @@ class PHPExcel_Reader_Excel5 extends PHPExcel_Reader_Abstract implements PHPExce
             $pos += 2;
 
             // option flags
-            $optionFlags = ord($recordData{$pos});
+            $optionFlags = ord($recordData[$pos]);
             ++$pos;
 
             // bit: 0; mask: 0x01; 0 = compressed; 1 = uncompressed
@@ -2955,7 +2955,7 @@ class PHPExcel_Reader_Excel5 extends PHPExcel_Reader_Abstract implements PHPExce
 
                     // repeated option flags
                     // OpenOffice.org documentation 5.21
-                    $option = ord($recordData{$pos});
+                    $option = ord($recordData[$pos]);
                     ++$pos;
 
                     if ($isCompressed && ($option == 0)) {
@@ -2977,7 +2977,7 @@ class PHPExcel_Reader_Excel5 extends PHPExcel_Reader_Abstract implements PHPExce
                         // this fragment compressed
                         $len = min($charsLeft, $limitpos - $pos);
                         for ($j = 0; $j < $len; ++$j) {
-                            $retstr .= $recordData{$pos + $j} . chr(0);
+                            $retstr .= $recordData[$pos + $j] . chr(0);
                         }
                         $charsLeft -= $len;
                         $isCompressed = false;
@@ -3906,7 +3906,7 @@ class PHPExcel_Reader_Excel5 extends PHPExcel_Reader_Abstract implements PHPExce
             $xfIndex = self::getInt2d($recordData, 4);
 
             // offset: 6; size: 8; result of the formula
-            if ((ord($recordData[6]) == 0) && (ord($recordData{12}) == 255) && (ord($recordData{13}) == 255)) {
+            if ((ord($recordData[6]) == 0) && (ord($recordData[12]) == 255) && (ord($recordData[13]) == 255)) {
                 // String formula. Result follows in appended STRING record
                 $dataType = PHPExcel_Cell_DataType::TYPE_STRING;
 
@@ -3919,20 +3919,20 @@ class PHPExcel_Reader_Excel5 extends PHPExcel_Reader_Abstract implements PHPExce
                 // read STRING record
                 $value = $this->readString();
             } elseif ((ord($recordData[6]) == 1)
-                && (ord($recordData{12}) == 255)
-                && (ord($recordData{13}) == 255)) {
+                && (ord($recordData[12]) == 255)
+                && (ord($recordData[13]) == 255)) {
                 // Boolean formula. Result is in +2; 0=false, 1=true
                 $dataType = PHPExcel_Cell_DataType::TYPE_BOOL;
                 $value = (bool) ord($recordData[8]);
             } elseif ((ord($recordData[6]) == 2)
-                && (ord($recordData{12}) == 255)
-                && (ord($recordData{13}) == 255)) {
+                && (ord($recordData[12]) == 255)
+                && (ord($recordData[13]) == 255)) {
                 // Error formula. Error code is in +2
                 $dataType = PHPExcel_Cell_DataType::TYPE_ERROR;
                 $value = PHPExcel_Reader_Excel5_ErrorCode::lookup(ord($recordData[8]));
             } elseif ((ord($recordData[6]) == 3)
-                && (ord($recordData{12}) == 255)
-                && (ord($recordData{13}) == 255)) {
+                && (ord($recordData[12]) == 255)
+                && (ord($recordData[13]) == 255)) {
                 // Formula result is a null string
                 $dataType = PHPExcel_Cell_DataType::TYPE_NULL;
                 $value = '';
@@ -4598,9 +4598,9 @@ class PHPExcel_Reader_Excel5 extends PHPExcel_Reader_Abstract implements PHPExce
                 $hyperlinkType = 'UNC';
             } elseif (!$isFileLinkOrUrl) {
                 $hyperlinkType = 'workbook';
-            } elseif (ord($recordData{$offset}) == 0x03) {
+            } elseif (ord($recordData[$offset]) == 0x03) {
                 $hyperlinkType = 'local';
-            } elseif (ord($recordData{$offset}) == 0xE0) {
+            } elseif (ord($recordData[$offset]) == 0xE0) {
                 $hyperlinkType = 'URL';
             }
 
@@ -5387,18 +5387,18 @@ class PHPExcel_Reader_Excel5 extends PHPExcel_Reader_Abstract implements PHPExce
                 case 'tSub': // subtraction
                     $op2 = array_pop($formulaStrings);
                     $op1 = array_pop($formulaStrings);
-                    $formulaStrings[] = "$op1$space1$space0{$token['data']}$op2";
+                    $formulaStrings[] = "$op1$space1$space0[$token['data']]$op2";
                     unset($space0, $space1);
                     break;
                 case 'tUplus': // unary plus
                 case 'tUminus': // unary minus
                     $op = array_pop($formulaStrings);
-                    $formulaStrings[] = "$space1$space0{$token['data']}$op";
+                    $formulaStrings[] = "$space1$space0[$token['data']]$op";
                     unset($space0, $space1);
                     break;
                 case 'tPercent': // percent sign
                     $op = array_pop($formulaStrings);
-                    $formulaStrings[] = "$op$space1$space0{$token['data']}";
+                    $formulaStrings[] = "$op$space1$space0[$token['data']]";
                     unset($space0, $space1);
                     break;
                 case 'tAttrVolatile': // indicates volatile function
@@ -5445,7 +5445,7 @@ class PHPExcel_Reader_Excel5 extends PHPExcel_Reader_Abstract implements PHPExce
                             $ops[] = array_pop($formulaStrings);
                         }
                         $ops = array_reverse($ops);
-                        $formulaStrings[] = "$space1$space0{$token['data']['function']}(" . implode(',', $ops) . ")";
+                        $formulaStrings[] = "$space1$space0[$token['data']['function']](" . implode(',', $ops) . ")";
                         unset($space0, $space1);
                     } else {
                         // add-in function
@@ -5474,7 +5474,7 @@ class PHPExcel_Reader_Excel5 extends PHPExcel_Reader_Abstract implements PHPExce
                     // bite off chunk of additional data
                     $cellRangeAddressList = $this->readBIFF8CellRangeAddressList($additionalData);
                     $additionalData = substr($additionalData, $cellRangeAddressList['size']);
-                    $formulaStrings[] = "$space1$space0{$token['data']}";
+                    $formulaStrings[] = "$space1$space0[$token['data']]";
                     unset($space0, $space1);
                     break;
                 case 'tArea': // cell range address
@@ -5493,7 +5493,7 @@ class PHPExcel_Reader_Excel5 extends PHPExcel_Reader_Abstract implements PHPExce
                 case 'tRefN':
                 case 'tAreaN':
                 case 'tStr': // string
-                    $formulaStrings[] = "$space1$space0{$token['data']}";
+                    $formulaStrings[] = "$space1$space0[$token['data']]";
                     unset($space0, $space1);
                     break;
             }
